@@ -38,7 +38,15 @@ connect_bd_net -net proc_sys_reset_0_interconnect_aresetn \
    [get_bd_ports sys_reset_n] \
    [get_bd_pins axi_clock_converter_0/m_axi_aresetn] \
    [get_bd_pins axi_clock_converter_1/m_axi_aresetn] \
-   [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
+   [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn] \
+   [get_bd_pins axis_clock_converter_0/m_axis_aresetn] \
+   [get_bd_pins axis_clock_converter_1/s_axis_aresetn] \
+   [get_bd_pins axis_clock_converter_2/m_axis_aresetn] \
+   [get_bd_pins axis_clock_converter_3/s_axis_aresetn]
+# NOTE: the sys_clk-side resets of the four QSFP AXI-Stream clock converters above were
+# missing (present in the U250 template). Vivado ties an unconnected aresetn to 1'b0, which
+# held the host side of the token FIFOs in reset forever: Aurora channel_up was 1 but no
+# FireAxe token ever crossed the cable (found with an ILA, 2026-10-28).
 
 connect_bd_net -net rst_ddr4_0_interconnect_aresetn \
    [get_bd_pins proc_sys_reset_ddr_0/interconnect_aresetn] \
@@ -53,10 +61,6 @@ connect_bd_net -net xdma_0_axi_aresetn \
 # --- Clock fanout ---
 # DDR UI clock (250 MHz) feeds the system clk_wiz input, the DDR side of the
 # width converter, and the DDR-side reset.
-
-connect_bd_net -net clk_100mhz \
-   [get_bd_pins clk_wiz_aurora_0/clk_in1]\
-   [get_bd_ports fixed_100mhz_clk]
 
 connect_bd_net -net ddr4_0_c0_ddr4_ui_clk \
    [get_bd_pins ddr4_0/c0_ddr4_ui_clk] \
@@ -95,7 +99,8 @@ connect_bd_intf_net -intf_net axis_data_fifo_3_M_AXIS [get_bd_intf_pins aurora_6
 connect_bd_net -net xdma_0_axi_aclk \
    [get_bd_pins xdma_0/axi_aclk] \
    [get_bd_pins axi_clock_converter_0/s_axi_aclk] \
-   [get_bd_pins axi_clock_converter_1/s_axi_aclk]
+   [get_bd_pins axi_clock_converter_1/s_axi_aclk] \
+   [get_bd_pins clk_wiz_aurora_0/clk_in1]
 
 # PCIe refclk buffering (IBUFDSGTE outputs: full GT and /2 divided).
 connect_bd_net -net util_ds_buf_IBUF_OUT \
@@ -149,7 +154,7 @@ connect_bd_net -net axis_clock_converter_2_m_axis_tdata [get_bd_pins axis_clock_
 connect_bd_net -net axis_clock_converter_2_m_axis_tvalid [get_bd_pins axis_clock_converter_2/m_axis_tvalid] [get_bd_ports FROM_QSFP0_VALID]
 connect_bd_net -net axis_clock_converter_3_s_axis_tready [get_bd_pins axis_clock_converter_3/s_axis_tready] [get_bd_ports TO_QSFP0_READY]
 connect_bd_net -net clk_wiz_aurora_0_clk_out1 [get_bd_pins aurora_64b66b_0_driver/INIT_CLK_IN] [get_bd_pins aurora_64b66b_1_driver/INIT_CLK_IN] [get_bd_pins clk_wiz_aurora_0/clk_out1]
-connect_bd_net -net clk_wiz_aurora_0_locked [get_bd_pins aurora_64b66b_0_driver/locked] [get_bd_pins aurora_64b66b_0_driver/locked] [get_bd_pins clk_wiz_aurora_0/locked]
+connect_bd_net -net clk_wiz_aurora_0_locked [get_bd_pins aurora_64b66b_0_driver/locked] [get_bd_pins aurora_64b66b_1_driver/locked] [get_bd_pins clk_wiz_aurora_0/locked]
 connect_bd_net -net util_vector_logic_0_Res [get_bd_pins axis_clock_converter_0/s_axis_aresetn] [get_bd_pins axis_clock_converter_1/m_axis_aresetn] [get_bd_pins axis_data_fifo_2/s_axis_aresetn] [get_bd_pins axis_data_fifo_3/s_axis_aresetn] [get_bd_pins util_vector_logic_0/Res]
 connect_bd_net -net util_vector_logic_1_Res [get_bd_pins axis_clock_converter_2/s_axis_aresetn] [get_bd_pins axis_clock_converter_3/m_axis_aresetn] [get_bd_pins axis_data_fifo_0/s_axis_aresetn] [get_bd_pins axis_data_fifo_1/s_axis_aresetn] [get_bd_pins util_vector_logic_1/Res]
 

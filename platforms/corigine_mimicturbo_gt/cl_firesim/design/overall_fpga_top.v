@@ -16,11 +16,46 @@ module overall_fpga_top(
     `DIFF_CLK_PDEF(pcie_refclk),
 
     input wire resetn,
-    input wire fixed_100mhz_clk
+
+    // QSFP0: GTY quad X0Y10 (bank 229), QSFP1: GTY quad X0Y12 (bank 231), each with its
+    // own 156.25 MHz MGTREFCLK0. Found with an IBERT probe on the two XB-10s (2026-10-27):
+    // these are the only quads whose lanes link through the installed cables.
+    input  wire [3:0] qsfp0_4x_grx_n,
+    input  wire [3:0] qsfp0_4x_grx_p,
+    output wire [3:0] qsfp0_4x_gtx_n,
+    output wire [3:0] qsfp0_4x_gtx_p,
+    input  wire       qsfp0_156mhz_clk_n,
+    input  wire       qsfp0_156mhz_clk_p,
+    input  wire [3:0] qsfp1_4x_grx_n,
+    input  wire [3:0] qsfp1_4x_grx_p,
+    output wire [3:0] qsfp1_4x_gtx_n,
+    output wire [3:0] qsfp1_4x_gtx_p,
+    input  wire       qsfp1_156mhz_clk_n,
+    input  wire       qsfp1_156mhz_clk_p
 );
 
     wire sys_clk;
     wire sys_reset_n;
+
+    // QSFP/Aurora streams between the block design and the FireSim block.
+    // These must be declared explicitly: without them Verilog creates 1-bit
+    // implicit nets, so the 256-bit data buses are truncated to one bit and
+    // Vivado can prove the cut-bridge token path (and everything clocked
+    // behind it) constant and remove it.
+    wire         QSFP0_CHANNEL_UP;
+    wire         TO_QSFP0_READY;
+    wire         TO_QSFP0_VALID;
+    wire [255:0] TO_QSFP0_DATA;
+    wire         FROM_QSFP0_READY;
+    wire         FROM_QSFP0_VALID;
+    wire [255:0] FROM_QSFP0_DATA;
+    wire         QSFP1_CHANNEL_UP;
+    wire         TO_QSFP1_READY;
+    wire         TO_QSFP1_VALID;
+    wire [255:0] TO_QSFP1_DATA;
+    wire         FROM_QSFP1_READY;
+    wire         FROM_QSFP1_VALID;
+    wire [255:0] FROM_QSFP1_DATA;
 
     `define AMBA_AXI4
     `define AMBA_AXI_CACHE
@@ -58,7 +93,6 @@ module overall_fpga_top(
 	`undef DDR4_PAR
 
 	`DIFF_CLK_CONNECT(default_250mhz_clk0, default_250mhz_clk0)
-        , .fixed_100mhz_clk(fixed_100mhz_clk)
 	`define AMBA_AXI4
 	`define AMBA_AXI_CACHE
 	`define AMBA_AXI_PROT
@@ -108,6 +142,18 @@ module overall_fpga_top(
         , .FROM_QSFP1_DATA(FROM_QSFP1_DATA)
         , .FROM_QSFP1_VALID(FROM_QSFP1_VALID)
         , .FROM_QSFP1_READY(FROM_QSFP1_READY)
+        , .qsfp0_4x_grx_n(qsfp0_4x_grx_n)
+        , .qsfp0_4x_grx_p(qsfp0_4x_grx_p)
+        , .qsfp0_4x_gtx_n(qsfp0_4x_gtx_n)
+        , .qsfp0_4x_gtx_p(qsfp0_4x_gtx_p)
+        , .qsfp0_156mhz_clk_n(qsfp0_156mhz_clk_n)
+        , .qsfp0_156mhz_clk_p(qsfp0_156mhz_clk_p)
+        , .qsfp1_4x_grx_n(qsfp1_4x_grx_n)
+        , .qsfp1_4x_grx_p(qsfp1_4x_grx_p)
+        , .qsfp1_4x_gtx_n(qsfp1_4x_gtx_n)
+        , .qsfp1_4x_gtx_p(qsfp1_4x_gtx_p)
+        , .qsfp1_156mhz_clk_n(qsfp1_156mhz_clk_n)
+        , .qsfp1_156mhz_clk_p(qsfp1_156mhz_clk_p)
 
         , .sys_clk(sys_clk)
         , .sys_reset_n(sys_reset_n)

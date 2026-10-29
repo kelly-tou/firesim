@@ -129,17 +129,17 @@ proc create_generic_aurora_64b66b { name } {
 # X1YN where N=4,5,6,7,10,11 (channel enable is N*4 to N*4+3)
 set aurora_64b66b_0 [ create_generic_aurora_64b66b aurora_64b66b_0 ]
 set_property -dict [ list \
-   CONFIG.CHANNEL_ENABLE {X0Y24 X0Y25 X0Y26 X0Y27} \
-   CONFIG.C_REFCLK_SOURCE {MGTREFCLK0_of_Quad_X0Y6} \
-   CONFIG.C_START_LANE {X0Y24} \
-   CONFIG.C_START_QUAD {Quad_X0Y6} \
+   CONFIG.CHANNEL_ENABLE {X0Y40 X0Y41 X0Y42 X0Y43} \
+   CONFIG.C_REFCLK_SOURCE {MGTREFCLK0_of_Quad_X0Y10} \
+   CONFIG.C_START_LANE {X0Y40} \
+   CONFIG.C_START_QUAD {Quad_X0Y10} \
 ] $aurora_64b66b_0
 set aurora_64b66b_1 [ create_generic_aurora_64b66b aurora_64b66b_1 ]
 set_property -dict [ list \
-   CONFIG.CHANNEL_ENABLE {X0Y32 X0Y33 X0Y34 X0Y35} \
-   CONFIG.C_REFCLK_SOURCE {MGTREFCLK0_of_Quad_X0Y8} \
-   CONFIG.C_START_LANE {X0Y32} \
-   CONFIG.C_START_QUAD {Quad_X0Y8} \
+   CONFIG.CHANNEL_ENABLE {X0Y48 X0Y49 X0Y50 X0Y51} \
+   CONFIG.C_REFCLK_SOURCE {MGTREFCLK0_of_Quad_X0Y12} \
+   CONFIG.C_START_LANE {X0Y48} \
+   CONFIG.C_START_QUAD {Quad_X0Y12} \
 ] $aurora_64b66b_1
 
 proc create_aurora_driver { name } {
@@ -203,16 +203,11 @@ set axis_data_fifo_3 [ create_axis_data_fifo axis_data_fifo_3 ]
 
 set clk_wiz_aurora_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz_aurora_0 ]
 
+# Aurora init clock: 100 MHz derived from XDMA's 250 MHz axi_aclk (the board's AM49
+# "fixed_100mhz_clk" pin was never verified to carry a clock).
 set_property -dict [list \
-  CONFIG.CLKIN1_JITTER_PS {40.0} \
-  CONFIG.CLKOUT1_JITTER {134.506} \
-  CONFIG.CLKOUT1_PHASE_ERROR {154.678} \
+  CONFIG.PRIM_IN_FREQ {250.000} \
   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
-  CONFIG.MMCM_CLKFBOUT_MULT_F {24.000} \
-  CONFIG.MMCM_CLKIN1_PERIOD {4.000} \
-  CONFIG.MMCM_CLKIN2_PERIOD {10.0} \
-  CONFIG.MMCM_DIVCLK_DIVIDE {5} \
-  CONFIG.PRIM_IN_FREQ {100} \
 ] [get_bd_cells clk_wiz_aurora_0]
 
 proc create_util_vector_logic { name } {

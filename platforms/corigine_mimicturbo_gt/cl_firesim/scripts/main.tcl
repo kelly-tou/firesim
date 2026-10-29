@@ -120,6 +120,14 @@ check_file_exists [set pinXdc ${root_dir}/design/mimicturbo_gt_pins.xdc]
 add_files -fileset synth_fileset -norecurse $pinXdc
 add_files -fileset impl_fileset -norecurse $pinXdc
 
+# QSFP/Aurora clock-group constraints. Added after the FireSim-generated XDC and processed
+# LATE so that host_clock and the GT-derived user clocks exist when they are evaluated.
+check_file_exists [set clkXdc ${root_dir}/design/mimicturbo_gt_clocks.xdc]
+add_files -fileset synth_fileset -norecurse $clkXdc
+add_files -fileset impl_fileset -norecurse $clkXdc
+set_property PROCESSING_ORDER LATE [get_files -of [get_filesets synth_fileset] $clkXdc]
+set_property PROCESSING_ORDER LATE [get_files -of [get_filesets impl_fileset] $clkXdc]
+
 proc set_fileset_for_run_or_delete { fsname runname } {
     if {[llength [get_filesets -quiet $fsname]]} {
         set_property constrset $fsname [get_runs $runname]

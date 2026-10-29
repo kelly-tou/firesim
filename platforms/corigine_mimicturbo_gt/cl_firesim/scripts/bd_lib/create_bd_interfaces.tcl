@@ -7,7 +7,6 @@ set_property -dict [ list \
    CONFIG.FREQ_HZ {250000000} \
 ] $default_250mhz_clk0
 
-create_bd_port -dir I -type clk -freq_hz 100000000 fixed_100mhz_clk
 
 set pci_express_x16 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:pcie_7x_mgt_rtl:1.0 pci_express_x16 ]
 
